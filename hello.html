@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Advanced Currency Converter & More</title>
+    <style>
+        *{box-sizing:border-box;}
+        body {
+            margin:0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background:
+                radial-gradient(circle at top left, #a685e2 0%, #7551d1 60%),
+                linear-gradient(135deg, #28283f 0%, #525673 100%);
+            color: #e0e0e0;
+            height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+        #app {
+            background: rgba(35, 25, 55, 0.75);
+            border-radius: 18px;
+            width: 100%;
+            max-width: 1200px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 30px #8a67e7cc;
+            backdrop-filter: blur(9px);
+            margin: 0 auto;
+        }
+        header {
+            padding: 20px 30px;
+            border-bottom: 1px solid #7551d1aa;
+            text-align: center;
+            user-select:none;
+        }
+        header h1 {
+            font-weight: 800;
+            font-size: 2.5rem;
+            color: #e9e9f4;
+            text-shadow: 0 0 10px #b393ff;
+            margin: 0;
+            letter-spacing: 1.6px;
+        }
+        nav.top-menu {
+            display: flex;
+            justify-content: center;
+            background: rgba(55, 48, 88, 0.8);
+            padding: 10px 0;
+            user-select:none;
+        }
+        nav.top-menu { margin-bottom: 20px; }
+        nav.top-menu button {
+            background: transparent;
+            border: none;
+            padding: 13px 25px;
+            color: #d1caffcc;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            flex-grow: 0;
+            transition: background-color 0.3s ease, color 0.3s ease, border-bottom 0.3s ease;
+        }
+        nav.top-menu button.active {
+            border-bottom: 3px solid #e6c9ff;
+            color: #f0e6ff;
+            background-color: rgba(75,58,114,0.8);
+        }
+        nav.top-menu button:hover:not(.active) {
+            background: rgba(85,70,130,0.7);
+            color: #e5dfff;
+        }
+        nav.top-menu button:focus-visible {
+            outline: 2px solid #b38effcc;
+            outline-offset: -2px;
+        }
+        main {
+            flex-grow: 1;
+            display: flex;
+            overflow: auto;
+            padding: 20px 30px;
+            min-height: 0;
+        }
+        .left-bar {
+            width: 200px;
+            background: rgba(55, 48, 88, 0.7);
+            color: #d1caffcc;
+            padding: 20px;
+            border-radius: 14px;
+            margin: 20px 10px 20px 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            overflow-y: auto;
+            max-height: calc(100vh - 140px);
+            position: relative;
+        }
+        .left-bar h2 {
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #e9e9f4;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #7551d1aa;
+            position: sticky;
+            top: 0;
+            background: rgba(55,48,88,0.7);
+            z-index: 1;
+        }
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0 30px;
+            overflow-y: auto;
+            min-width: 0;
+        }
+        .converter-box {
+            margin-bottom: 30px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            letter-spacing: 0.7px;
+            font-size: 0.95rem;
+            color: #e1d7ffcc;
+        }
+        select, input[type="number"], input[type="email"], input[type="text"], textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(154,127,234,0.2);
+            outline: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #333;
+            background-color: #f0f0f0;
+            resize: none;
+            margin-bottom: 15px;
+            transition: box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+        select:focus, input:focus, textarea:focus {
+            box-shadow: 0 0 12px #a68aff;
+            border-color: #a68aff;
+        }
+        textarea {
+            min-height: 120px;
+        }
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        button.swap-btn {
+            background: #8a67e2;
+            border: none;
+            padding: 13px 18px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.6rem;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 22px #c4aeffcc;
+            width: 50px;
+            height: 50px;
+            flex-shrink: 0;
+            user-select:none;
+            transition: background 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
+        }
+        button.swap-btn:hover {
+            background: #9d81f5;
+            box-shadow: 0 0 28px #d6c4ffdd;
+        }
+        button.convert-btn {
+            flex-grow: 1;
+            background: #7561d8;
+            border: none;
+            padding: 15px 30px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            border-radius: 14px;
+            cursor: pointer;
+            box-shadow: 0 0 16px #a88fffcc;
+            transition: background 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
+        }
+        button.convert-btn:hover {
+            background: #8e79ef;
+            box-shadow: 0 0 20px #babbffdd;
+        }
+        .result-box {
+            margin-top: 30px;
+            background: rgba(255,255,255,0.15);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.6rem;
+            color: #eee;
+            user-select:none;
+            word-wrap: break-word;
+            margin-bottom: 20px;
+            min-height:60px;
+        }
+        .rate-info {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            text-align: center;
+            color: #d6c4ffcc;
+            font-style: italic;
+            user-select:none;
+        }
+        .history-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: 14px;
+            padding: 15px;
+            font-size: 1rem;
+            background-color: rgba(110, 90, 190, 0.2);
+            color: #ebe6ffcc;
+            user-select:none;
+        }
+        .history-item {
+            border-bottom: 1px solid #8a67e7aa;
+            padding: 12px 8px;
+            word-break: break-word;
+        }
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        .history-timestamp {
+            font-size: 0.85rem;
+            color: #c9baffcc;
+            margin-top: 5px;
+        }
+        /* Right bar for rates */
+        .right-bar {
+            width: 220px;
+            background: rgba(55, 48, 88, 0.7);
+            color: #d1caffcc;
+            padding: 20px;
+            border-radius: 14px;
+            margin: 20px 0 20px 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            overflow-y: auto;
+            max-height: calc(100vh - 140px);
+            position: relative;
+        }
+        .right-bar h2 {
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #e9e9f4;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #7551d1aa;
+            position: sticky;
+            top: 0;
+            background: rgba(55,48,88,0.7);
+            z-index: 1;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #ddd;
+            font-size: 1rem;
+            user-select:none;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #6e57c2aa;
+            text-align: left;
+        }
+        th {
+            background-color: rgba(107, 73, 210, 0.8);
+            font-weight: 700;
+            color: #f0e6ff;
+        }
+        td.rate {
+            text-align:right;
+            font-variant-numeric: tabular-nums;
+            color:#e0d8ff;
+        }
+        tbody tr:hover {
+            background-color: rgba(123, 93, 231, 0.08);
+        }
+        .rate-info#rates-update-info {
+            margin-top:15px;
+            font-size: 0.9rem;
+            color: #ceaaffcc;
+            text-align:center;
+            user-select:none;
+        }
+        /* Panels for Reviews and Contact */
+        section[role="tabpanel"] {
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: calc(100vh - 140px);
+            background: rgba(35, 25, 55, 0.75);
+            border-radius: 16px;
+            padding: 20px;
+            color:#e0e0e0;
+        }
+        #panel-reviews h2, #panel-contact h2 {
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .review-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: 14px;
+            padding: 15px;
+            font-size: 1rem;
+            background-color: rgba(140, 118, 226, 0.15);
+            color: #f5efff;
+            user-select:none;
+        }
+        .review-item {
+            border-bottom: 1px solid #a379e0aa;
+            padding: 12px 10px;
+            word-break: break-word;
+        }
+        .review-item:last-child {
+            border-bottom: none;
+        }
+        .reviewer-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #e0cfff;
+        }
+        .review-text {
+            margin-top: 8px;
+            font-style: italic;
+            color: #f0e8ffcc;
+            font-size: 0.95rem;
+        }
+        .review-form button {
+            margin-top: 15px;
+            background: #8c71e0;
+            border: none;
+            color: white;
+            padding: 13px 25px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-weight: 700;
+            box-shadow: 0 0 16px #b8a7ffcc;
+            transition: background 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            font-size: 1.1rem;
+        }
+        .review-form button:hover {
+            background: #a58eff;
+            box-shadow: 0 0 20px #c8baffdd;
+        }
+        .contact-box label {
+            margin-top: 15px;
+        }
+        .contact-box button {
+            margin-top: 15px;
+            background: #8c71e0;
+            border: none;
+            color: white;
+            padding: 13px 25px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-weight: 700;
+            box-shadow: 0 0 16px #b8a7ffcc;
+            transition: background 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            font-size: 1.1rem;
+        }
+        .contact-box button:hover {
+            background: #a58eff;
+            box-shadow: 0 0 20px #c8baffdd;
+        }
+        .contact-message {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+            color: #a7e07a;
+            font-size: 1rem;
+        }
+        .contact-error {
+            color: #ff8a8a;
+        }
+
+        /* Login and Welcome Boxes */
+        #panel-login {
+            max-width: 400px;
+            margin: 0 auto;
+            color: #333;
+            background: #f0f0f0;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 0 25px rgba(138,103,226,0.4);
+            user-select:none;
+        }
+        #loginBox {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+        #loginBox input {
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            border: 1px solid #aaa;
+            font-size: 1rem;
+            outline: none;
+        }
+        #loginBox input:focus {
+            border-color: #8067d9;
+            box-shadow: 0 0 8px #8a67e2;
+        }
+        #loginBox button {
+            padding: 12px;
+            background: #8067d9;
+            border: none;
+            color: white;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 0 16px #b8a7ffcc;
+            transition: background 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            font-size: 1.1rem;
+        }
+        #loginBox button:hover {
+            background: #997ef8;
+            box-shadow: 0 0 20px #c8baffdd;
+        }
+        #loginStatus {
+            margin-top: 12px;
+            font-size: 1rem;
+            text-align: center;
+            min-height: 1.3em;
+        }
+        #logout-btn {
+            margin-top: 15px;
+            padding: 12px;
+            background: #c47676;
+            border: none;
+            color: white;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 0 17px #ff9d9dcc;
+            width: 100%;
+            font-size: 1.1rem;
+            display: none;
+            transition: background 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        #logout-btn:hover {
+            background: #e38686;
+            box-shadow: 0 0 21px #ffadadcc;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 15px 0 10px 0;
+            font-size: 0.9rem;
+            color: #9985c9;
+            user-select:none;
+            border-top: 1px solid #6b49d2aa;
+            margin-top: auto;
+            background: rgba(30, 20, 50, 0.9);
+        }
+        /* Footer Navigation */
+        .footer-nav {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 6px;
+            user-select:none;
+        }
+        .footer-nav button {
+            background: transparent;
+            border: none;
+            color: #d1caffcc;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            padding: 5px 15px;
+            transition: border-color 0.3s ease;
+            border-radius: 8px;
+        }
+        .footer-nav button:hover, .footer-nav button.active {
+            color: #f0e6ff;
+            border-color: #b393ff;
+            background-color: rgba(75,58,114,0.8);
+        }
+        .footer-nav button:focus-visible {
+            outline: 2px solid #b38effcc;
+            outline-offset: 2px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 950px) {
+            main {
+                flex-direction: column;
+                padding: 15px 20px;
+            }
+            .left-bar, .right-bar {
+                width: 100%;
+                max-height: 150px;
+                margin: 10px 0;
+            }
+            .main-content {
+                padding: 0;
+                margin-bottom: 20px;
+            }
+        }
+        @media (max-width: 600px) {
+            #app {
+                max-width: 100vw;
+                border-radius: 0;
+            }
+            .actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            button.swap-btn {
+                width: 100%;
+                height: 45px;
+                font-size: 1.2rem;
+            }
+            button.convert-btn {
+                width: 100%;
+                font-size: 1.1rem;
+                padding: 12px 0;
+            }
+            nav.top-menu {
+                flex-wrap: wrap;
+                gap: 10px;
+                padding: 10px 5px;
+            }
+            nav.top-menu button {
+                flex-grow: 1;
+                padding: 10px 0;
+                font-size: 1rem;
+                border-bottom-width: 2px;
+            }
+            .footer-nav {
+                flex-wrap: wrap;
+            }
+            .footer-nav button {
+                flex-grow: 1;
+                font-size: 1rem;
+                padding: 8px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="app" role="main" aria-label="Advanced Currency Converter and Features Application">
+    <header><h1 tabindex="0">Advanced Currency Converter</h1></header>
+
+    <nav class="top-menu" role="tablist" aria-label="Top Navigation Menu">
+        <button role="tab" aria-selected="true" tabindex="0" id="tab-converter" aria-controls="panel-converter" class="active">Converter</button>
+        <button role="tab" aria-selected="false" tabindex="-1" id="tab-info" aria-controls="panel-info">More Info</button>
+        <button role="tab" aria-selected="false" tabindex="-1" id="tab-login" aria-controls="panel-login">Login</button>
+    </nav>
+
+    <main>
+        <div class="left-bar" aria-label="Transaction History Sidebar">
+            <h2 tabindex="0">Transaction History</h2>
+            <div class="history-list" id="history-list" aria-live="polite" aria-atomic="false" tabindex="0" aria-label="List of previous conversion transactions">No transactions yet.</div>
+            <button id="clear-history-btn" aria-label="Clear Transaction History" style="margin-top:20px; background:#bb5555; border:none; border-radius:12px; padding:12px 22px; width:100%; font-weight:700; color:#ffc4c4; cursor:pointer; box-shadow:0 0 14px #cc7e7e;">Clear History</button>
+        </div>
+        <div class="main-content" tabindex="0">
+            <section id="panel-converter" role="tabpanel" aria-labelledby="tab-converter" hidden>
+                <div class="converter-box">
+                    <form id="converter-form" autocomplete="off" aria-live="polite" aria-atomic="true">
+                        <label for="from-currency">From Currency</label>
+                        <select id="from-currency" name="fromCurrency" aria-required="true" aria-describedby="from-currency-desc"></select>
+                        <div id="from-currency-desc" class="sr-only">Select currency to convert from</div>
+
+                        <label for="amount">Amount</label>
+                        <input type="number" id="amount" name="amount" min="0" step="any" placeholder="Enter amount" required aria-required="true" aria-describedby="amount-desc" />
+                        <div id="amount-desc" class="sr-only">Enter amount to convert</div>
+
+                        <label for="to-currency">To Currency</label>
+                        <select id="to-currency" name="toCurrency" aria-required="true" aria-describedby="to-currency-desc"></select>
+                        <div id="to-currency-desc" class="sr-only">Select currency to convert to</div>
+
+                        <div class="actions">
+                            <button type="button" class="swap-btn" id="swap-btn" title="Swap From and To currencies" aria-label="Swap currencies">&#8646;</button>
+                            <button type="submit" class="convert-btn" id="convert-btn" aria-live="polite" aria-atomic="true">Convert</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="result-box" id="result" tabindex="0" aria-live="polite" aria-atomic="true"></div>
+                <div class="rate-info" id="rate-info" aria-live="polite" aria-atomic="true"></div>
+            </section>
+
+            <section id="panel-info" role="tabpanel" aria-labelledby="tab-info" hidden>
+                <h2 tabindex="0" style="text-align:center; font-weight: 700; margin-bottom: 20px;">More Info</h2>
+                <p><b>Purpose of the Website:</b></p>
+                <p>This website helps users understand the importance of currency conversion in a simple and accessible way.</p>
+                <p><b>Why It Is Needed:</b></p>
+                <ul>
+                  <li>People frequently need to convert money while traveling abroad or shopping online.</li>
+                  <li>Understanding exchange rates is essential for international students, businesses, and travelers.</li>
+                  <li>This platform educates users about why currency converters matter.</li>
+                </ul>
+                <p><b>Key Advantages:</b></p>
+                <ul>
+                  <li>Easy-to-navigate interface with a clean layout.</li>
+                  <li>Integrated login system to personalize user experience.</li>
+                  <li>Dedicated sections for reviews, contact, and information.</li>
+                </ul>
+                <p><b>Website Details:</b></p>
+                <ul>
+                  <li>Developed by: Shisir Dhakal</li>
+                  <li>Location: Butwal, Nepal</li>
+                  <li>Built using HTML, CSS, and JavaScript.</li>
+                  <li>Lightweight, fast, and responsive design for all devices.</li>
+                </ul>
+            </section>
+
+            <section id="panel-login" role="tabpanel" aria-labelledby="tab-login" hidden>
+                <div id="panel-login" aria-live="polite" aria-atomic="true">
+                    <div id="loginBox" class="login-box" aria-label="Login Form">
+                        <h2 style="color:#333;">Login</h2>
+                        <input type="email" id="login-email" placeholder="Email" aria-required="true" aria-label="Email" autocomplete="email" />
+                        <input type="password" id="login-pass" placeholder="Password" aria-required="true" aria-label="Password" autocomplete="current-password" />
+                        <button id="login-btn" aria-label="Login Button">Login</button>
+                        <div id="loginStatus" role="alert" aria-live="assertive" style="margin-top: 10px; min-height: 1.2em;"></div>
+                    </div>
+                    <div id="welcomeBox" class="welcome-box" aria-label="User Logged In Info" tabindex="0" style="margin-top: 15px; color:#333; font-weight: 600;">
+                        <p id="welcomeText"></p>
+                        <button id="logout-btn" aria-label="Logout Button">Logout</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="panel-reviews" role="tabpanel" aria-labelledby="footer-tab-reviews" hidden>
+                <h2 tabindex="0">User Reviews</h2>
+                <div class="review-list" id="review-list" tabindex="0" aria-live="polite" aria-atomic="false" aria-label="List of reviews">No reviews yet.</div>
+                <form id="review-form" class="review-form" aria-label="Submit a review">
+                    <label for="review-name">Your Name</label>
+                    <input type="text" id="review-name" name="reviewName" placeholder="Enter your name" maxlength="30" required aria-required="true"/>
+                    <label for="review-text">Your Review</label>
+                    <textarea id="review-text" name="reviewText" placeholder="Write your review" maxlength="300" required aria-required="true"></textarea>
+                    <button type="submit" aria-live="polite" aria-atomic="true">Submit Review</button>
+                    <div id="review-feedback" role="alert" style="margin-top:10px;"></div>
+                </form>
+            </section>
+
+            <section id="panel-contact" role="tabpanel" aria-labelledby="footer-tab-contact" hidden>
+                <h2 tabindex="0">Contact Us</h2>
+                <form id="contact-form" class="contact-box" aria-label="Contact form">
+                    <label for="contact-name">Name</label>
+                    <input type="text" id="contact-name" name="contactName" placeholder="Your Name" maxlength="50" required aria-required="true"/>
+                    <label for="contact-email">Email</label>
+                    <input type="email" id="contact-email" name="contactEmail" placeholder="Your Email" maxlength="50" required aria-required="true"/>
+                    <label for="contact-message">Message</label>
+                    <textarea id="contact-message" name="contactMessage" placeholder="Your message" maxlength="500" required aria-required="true"></textarea>
+                    <button type="submit" aria-live="polite" aria-atomic="true">Send Message</button>
+                    <div id="contact-feedback" role="alert" class="contact-message"></div>
+                </form>
+            </section>
+        </div>
+
+        <div class="right-bar" aria-label="Current Exchange Rates Sidebar">
+            <h2 tabindex="0">Current Rates (Base USD)</h2>
+            <table aria-describedby="rates-desc">
+                <thead>
+                <tr>
+                    <th>Currency</th>
+                    <th>Rate</th>
+                </tr>
+                </thead>
+                <tbody id="rates-table-body">
+                <tr><td colspan="2" style="text-align:center; color:#bbb;">Loading rates...</td></tr>
+                </tbody>
+            </table>
+            <div id="rates-desc" class="sr-only">Shows current exchange rates for popular currencies relative to USD</div>
+            <div class="rate-info" id="rates-update-info" aria-live="polite" aria-atomic="true" style="margin-top:15px; font-size: 0.9rem; color: #ceaaffcc; text-align:center;"></div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-nav" role="tablist" aria-label="Footer Navigation">
+            <button role="tab" id="footer-tab-reviews" aria-controls="panel-reviews" aria-selected="false" tabindex="-1">Reviews</button>
+            <button role="tab" id="footer-tab-contact" aria-controls="panel-contact" aria-selected="false" tabindex="-1">Contact</button>
+        </div>
+        &copy; 2024 Advanced Currency Converter. All rights reserved.
+    </footer>
+</div>
+
+<script>
+    const currencies = {
+        USD:"United States Dollar", EUR:"Euro", GBP:"British Pound Sterling", JPY:"Japanese Yen", AUD:"Australian Dollar", CAD:"Canadian Dollar",
+        CHF:"Swiss Franc", CNY:"Chinese Yuan", INR:"Indian Rupee", BRL:"Brazilian Real", MXN:"Mexican Peso", ZAR:"South African Rand",
+        NZD:"New Zealand Dollar", KRW:"South Korean Won", SGD:"Singapore Dollar", RUB:"Russian Ruble", TRY:"Turkish Lira",
+        SEK:"Swedish Krona", NOK:"Norwegian Krone", DKK:"Danish Krone", PLN:"Polish Zloty", HKD:"Hong Kong Dollar",
+        MYR:"Malaysian Ringgit", IDR:"Indonesian Rupiah", THB:"Thai Baht", TWD:"New Taiwan Dollar", PHP:"Philippine Peso",
+        CZK:"Czech Koruna", HUF:"Hungarian Forint", ILS:"Israeli New Shekel", SAR:"Saudi Riyal", AED:"UAE Dirham"
+    };
+    const fromSelect = document.getElementById('from-currency');
+    const toSelect = document.getElementById('to-currency');
+    const amountInput = document.getElementById('amount');
+    const convertBtn = document.getElementById('convert-btn');
+    const swapBtn = document.getElementById('swap-btn');
+    const resultBox = document.getElementById('result');
+    const rateInfo = document.getElementById('rate-info');
+    const historyList = document.getElementById('history-list');
+    const clearHistoryBtn = document.getElementById('clear-history-btn');
+
+    const loginEmailInput = document.getElementById('login-email');
+    const loginPassInput = document.getElementById('login-pass');
+    const loginBtn = document.getElementById('login-btn');
+    const loginStatus = document.getElementById('loginStatus');
+    const logoutBtn = document.getElementById('logout-btn');
+    const welcomeBox = document.getElementById('welcomeBox');
+    const welcomeText = document.getElementById('welcomeText');
+    const loginBox = document.getElementById('loginBox');
+
+    const reviewForm = document.getElementById('review-form');
+    const reviewNameInput = document.getElementById('review-name');
+    const reviewTextInput = document.getElementById('review-text');
+    const reviewFeedback = document.getElementById('review-feedback');
+    const reviewList = document.getElementById('review-list');
+
+    const contactForm = document.getElementById('contact-form');
+    const contactFeedback = document.getElementById('contact-feedback');
+
+    const ratesTableBody = document.getElementById('rates-table-body');
+    const ratesUpdateInfo = document.getElementById('rates-update-info');
+
+    const navTopMenuButtons = document.querySelectorAll('nav.top-menu button[role="tab"]');
+    const footerNavButtons = document.querySelectorAll('footer .footer-nav button[role="tab"]');
+    const LS_HISTORY = "currencyConversionHistory";
+    const LS_REVIEWS = "currencyUserReviews";
+    const LS_LOGIN = "currencyAppLoginUser";
+
+    function populateCurrencyDropdowns(){
+      Object.entries(currencies).forEach(([code,name])=>{
+        const opt1=document.createElement('option');
+        opt1.value=code; opt1.textContent = `${code} - ${name}`;
+        fromSelect.appendChild(opt1);
+        const opt2=document.createElement('option');
+        opt2.value=code; opt2.textContent = `${code} - ${name}`;
+        toSelect.appendChild(opt2);
+      });
+    }
+    function setDefaultCurrencies(){fromSelect.value="USD";toSelect.value="EUR";}
+    function swapCurrencies(){
+      [fromSelect.value,toSelect.value]=[toSelect.value,fromSelect.value];
+      resultBox.textContent=rateInfo.textContent="";
+    }
+    function isValidEmail(email){
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+    async function convertCurrency(fromCurrency,toCurrency,amount){
+      if(fromCurrency===toCurrency) return {convertedAmount:amount,rate:1,updated:new Date()};
+      try{
+        const res=await fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrency}`);
+        if(!res.ok) throw new Error("API error");
+        const data=await res.json();
+        if(!data.rates || !data.rates[toCurrency]) throw new Error("No rate");
+        const rate=data.rates[toCurrency];
+        return {convertedAmount:amount*rate,rate,updated:new Date(data.time_last_updated*1000)};
+      }catch(e){throw e;}
+    }
+    function addToHistory(entry){
+      let h=JSON.parse(localStorage.getItem(LS_HISTORY))||[];
+      h.unshift(entry);
+      if(h.length>30) h.pop();
+      localStorage.setItem(LS_HISTORY,JSON.stringify(h));
+    }
+    function renderHistory(){
+      const h=JSON.parse(localStorage.getItem(LS_HISTORY))||[];
+      if(!h.length) {historyList.textContent="No transactions yet.";return;}
+      historyList.innerHTML="";
+      h.forEach(item=>{
+        const d=document.createElement('div');
+        d.className="history-item break-word";
+        d.innerHTML=`<div>${item.amount} ${item.from} → ${parseFloat(item.converted).toFixed(4)} ${item.to}</div>
+        <div class="history-timestamp">${new Date(item.time).toLocaleString()}</div>`;
+        historyList.appendChild(d);
+      });
+    }
+    clearHistoryBtn.onclick=()=>{
+      if(confirm("Are you sure you want to clear all transaction history?")){
+        localStorage.removeItem(LS_HISTORY);
+        renderHistory();
+      }
+    };
+    function recordHistory(amount, fromCur, converted, toCur){
+      addToHistory({
+        amount: amount.toLocaleString(undefined, {maximumFractionDigits:8}),
+        from: fromCur,
+        converted: converted.toFixed(8),
+        to: toCur,
+        time: Date.now()
+      });
+      renderHistory();
+    }
+
+    function setReviewFeedback(msg,isError=false){
+      reviewFeedback.textContent=msg;
+      reviewFeedback.style.color=isError?'#ff7070':'#96ff8a';
+    }
+    function setContactFeedback(msg,isError=false){
+      contactFeedback.textContent=msg;
+      contactFeedback.classList.toggle('contact-error',isError);
+    }
+    function escapeHTML(str) {
+      return String(str).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+    function renderReviews(){
+      const r=JSON.parse(localStorage.getItem(LS_REVIEWS))||[];
+      if(!r.length) {reviewList.textContent="No reviews yet.";return;}
+      reviewList.innerHTML="";
+      r.forEach(x=>{
+        const d=document.createElement('div');
+        d.className="review-item break-word";
+        d.innerHTML=`<div class="reviewer-name">${escapeHTML(x.name)}</div>
+          <div class="review-text">"${escapeHTML(x.text)}"</div>
+          <div style="font-size:0.7rem; color:#b3aaffcc; margin-top:2px;">${new Date(x.time).toLocaleDateString()}</div>`;
+        reviewList.appendChild(d);
+      });
+    }
+    reviewForm.onsubmit=e=>{
+      e.preventDefault();
+      const name=reviewNameInput.value.trim();
+      const text=reviewTextInput.value.trim();
+      if(!name || !text){setReviewFeedback("Both name and review text are required",true);return;}
+      if(text.length>300){setReviewFeedback("Review too long (max 300 characters)",true);return;}
+      let r=JSON.parse(localStorage.getItem(LS_REVIEWS))||[];
+      r.unshift({name,text,time:Date.now()});
+      if(r.length>30) r.pop();
+      localStorage.setItem(LS_REVIEWS,JSON.stringify(r));
+      reviewNameInput.value=""; reviewTextInput.value="";
+      renderReviews();
+      setReviewFeedback("Thank you for your review!");
+    };
+
+    contactForm.onsubmit=e=>{
+      e.preventDefault();
+      const n=contactForm.contactName.value.trim(), em=contactForm.contactEmail.value.trim(), msg=contactForm.contactMessage.value.trim();
+      if(!n || !em || !msg) {setContactFeedback("Please fill all fields.", true); return;}
+      if(!isValidEmail(em)) {setContactFeedback("Invalid email format.",true);return;}
+      if(msg.length>500) {setContactFeedback("Message too long (max 500 characters).",true);return;}
+      setContactFeedback("Sending message...");
+      setTimeout(()=>{setContactFeedback(`Thank you, ${n}! Message received.`); contactForm.reset();},1200);
+    };
+
+    const popularCurrencies = ["EUR","GBP","JPY","AUD","CAD","CHF","CNY","INR","BRL","MXN"];
+    async function loadPopularRates(){
+      ratesTableBody.innerHTML='<tr><td colspan="2" style="text-align:center;color:#bbb;">Loading rates...</td></tr>';
+      ratesUpdateInfo.textContent="";
+      try{
+        const res=await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+        if(!res.ok) throw new Error("API error");
+        const data=await res.json();
+        ratesTableBody.innerHTML="";
+        popularCurrencies.forEach(curr=>{
+          const rate=data.rates[curr];
+          if(rate){
+            const tr=document.createElement('tr');
+            const tdCurr=document.createElement('td');
+            const tdRate=document.createElement('td');
+            tdCurr.textContent=`${curr} - ${currencies[curr] || ''}`;
+            tdRate.className="rate";
+            tdRate.textContent=rate.toFixed(4);
+            tr.appendChild(tdCurr); tr.appendChild(tdRate);
+            ratesTableBody.appendChild(tr);
+          }
+        });
+        ratesUpdateInfo.textContent=`Rates updated on: ${new Date(data.time_last_updated*1000).toLocaleString()}`;
+      }catch{
+        ratesTableBody.innerHTML='<tr><td colspan="2" style="text-align:center;color:#e08585;">Failed to load rates.</td></tr>';
+      }
+    }
+
+    // Login functions
+    function getLoggedInUser(){return localStorage.getItem(LS_LOGIN);}
+    function setLoggedInUser(email){localStorage.setItem(LS_LOGIN,email);}
+    function logOutUser(){localStorage.removeItem(LS_LOGIN);}
+    function updateLoginUI(){
+      const user=getLoggedInUser();
+      if(user){
+        welcomeText.textContent=`Logged in as: ${user}`;
+        welcomeBox.style.display = "block";
+        loginBox.style.display = "none";
+        logoutBtn.style.display = "block";
+      } else {
+        welcomeText.textContent = "";
+        welcomeBox.style.display = "none";
+        loginBox.style.display = "flex";
+        logoutBtn.style.display = "none";
+      }
+    }
+    loginBtn.addEventListener('click', e=>{
+      e.preventDefault();
+      const email=loginEmailInput.value.trim().toLowerCase();
+      const pass=loginPassInput.value.trim();
+      if(!email || !pass){
+        loginStatus.textContent="Please enter both email and password.";
+        loginStatus.style.color="#ff6b6b";
+        return;
+      }
+      if(!isValidEmail(email)){
+        loginStatus.textContent="Please enter a valid email address.";
+        loginStatus.style.color="#ff6b6b";
+        return;
+      }
+      setLoggedInUser(email);
+      updateLoginUI();
+      loginStatus.textContent="";
+      loginEmailInput.value="";
+      loginPassInput.value="";
+    });
+    logoutBtn.addEventListener('click', e=>{
+      e.preventDefault();
+      logOutUser();
+      updateLoginUI();
+    });
+
+    // Tab switching helper
+    function switchTab(newId){
+      // Handle top menu tabs
+      navTopMenuButtons.forEach(btn=>{
+        const pid=btn.getAttribute('aria-controls');
+        const isActive = btn.id === newId;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        btn.setAttribute('tabindex', isActive ? '0' : '-1');
+        if(pid){
+          const panel = document.getElementById(pid);
+          if(panel) panel.hidden = !isActive;
+        }
+      });
+      // Also handle footer nav tabs for Reviews and Contact
+      footerNavButtons.forEach(btn=>{
+        const pid=btn.getAttribute('aria-controls');
+        const isActive = btn.id === newId;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        btn.setAttribute('tabindex', isActive ? '0' : '-1');
+        if(pid){
+          const panel = document.getElementById(pid);
+          if(panel) panel.hidden = !isActive;
+        }
+      });
+
+      // When switching tabs, scroll main-content into view for accessibility
+      const mainContent = document.querySelector('.main-content');
+      if (mainContent) mainContent.focus();
+    }
+
+    // Keyboard tab navigation helper
+    function handleTabNavigation(e, buttons){
+      let idx=[...buttons].indexOf(document.activeElement);
+      if(e.key==='ArrowRight' || e.key==='ArrowDown') idx=(idx+1)%buttons.length;
+      else if(e.key==='ArrowLeft' || e.key==='ArrowUp') idx=(idx-1+buttons.length)%buttons.length;
+      else if(e.key==='Home') idx=0;
+      else if(e.key==='End') idx=buttons.length-1;
+      else return;
+      buttons[idx].focus();
+      e.preventDefault();
+    }
+
+    function init(){
+      populateCurrencyDropdowns();
+      setDefaultCurrencies();
+      renderHistory();
+      renderReviews();
+      updateLoginUI();
+      loadPopularRates();
+      switchTab('tab-converter');
+
+      navTopMenuButtons.forEach(btn => {
+        btn.addEventListener('click', ()=>switchTab(btn.id));
+        btn.addEventListener('keydown', e=>handleTabNavigation(e, navTopMenuButtons));
+      });
+      footerNavButtons.forEach(btn => {
+        btn.addEventListener('click', ()=>switchTab(btn.id));
+        btn.addEventListener('keydown', e=>handleTabNavigation(e, footerNavButtons));
+      });
+    }
+
+    // Trigger currency conversion form submission on Enter key in amount input
+    amountInput.addEventListener('keydown', e => {
+      if(e.key === "Enter") {
+        e.preventDefault();
+        convertBtn.click();
+      }
+    });
+
+    // Convert form submit
+    document.getElementById('converter-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const fromCurrency=fromSelect.value;
+      const toCurrency=toSelect.value;
+      const amountStr=amountInput.value.trim();
+      const amount=parseFloat(amountStr);
+      resultBox.textContent=rateInfo.textContent="";
+      if(!amountStr || isNaN(amount) || amount<0){
+        resultBox.textContent="Please enter a valid amount greater than or equal to 0.";
+        return;
+      }
+      resultBox.textContent="Converting...";
+      try{
+        const conv=await convertCurrency(fromCurrency,toCurrency,amount);
+        const convRounded=parseFloat(conv.convertedAmount.toFixed(6));
+        resultBox.textContent=`${amount.toLocaleString()} ${fromCurrency} = ${convRounded.toLocaleString()} ${toCurrency}`;
+        rateInfo.textContent=`1 ${fromCurrency} = ${conv.rate.toFixed(6)} ${toCurrency} (Updated ${conv.updated.toLocaleString()})`;
+        recordHistory(amount,fromCurrency,convRounded,toCurrency);
+      } catch {
+        resultBox.textContent="Failed to convert currency. Please try again later.";
+      }
+    });
+
+    swapBtn.addEventListener('click', () => {
+      swapCurrencies();
+      if(amountInput.value.trim()!==""){
+        convertBtn.click();
+      }
+    });
+
+    // Load popular rates on start
+    init();
+
+</script>
+
+</body>
+</html>
+
